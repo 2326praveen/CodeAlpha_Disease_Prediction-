@@ -1,14 +1,3 @@
-"""
-Train models (LogisticRegression, SVC, RandomForest, XGBoost) on `heart.csv`,
-select the best by accuracy on the test set, and save the model + scaler as
-`best_model.pkl` and `scaler.pkl` for the Streamlit app to load.
-
-Run:
-    python train_and_save.py
-
-This script is independent from Streamlit and intended to be run once to
-produce the saved artifacts used by `disease_prediction_app.py`.
-"""
 
 import pandas as pd
 import numpy as np
@@ -18,7 +7,8 @@ from sklearn.metrics import accuracy_score, f1_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
-# import xgboost only if available (training will skip it otherwise)
+
+
 import importlib
 _spec = importlib.util.find_spec("xgboost")
 if _spec is not None:
@@ -79,3 +69,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
