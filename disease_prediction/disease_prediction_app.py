@@ -9,7 +9,7 @@ from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, classifi
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
-# import xgboost if available using importlib to avoid raising at parse time
+
 import importlib
 _spec = importlib.util.find_spec("xgboost")
 if _spec is not None:
@@ -22,12 +22,9 @@ import joblib
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# -------------------------
-# LOAD AND PREPROCESS DATA
-# -------------------------
 @st.cache_data
 def load_data():
-    # the dataset is located at the workspace root as `heart.csv`
+
     df = pd.read_csv('heart.csv')
     return df
 
@@ -36,28 +33,20 @@ df = load_data()
 st.title("💖 Heart Disease Prediction System")
 st.write("Predict whether a person has heart disease based on medical attributes.")
 
-# Show dataset preview
 if st.checkbox("Show Dataset"):
     st.dataframe(df.head())
 
-# -------------------------
-# FEATURE SELECTION & SPLIT
-# -------------------------
 X = df.drop('target', axis=1)
 y = df['target']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
-# -------------------------
-# FEATURE SCALING
-# -------------------------
+
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
-# -------------------------
-# MODEL TRAINING FUNCTION
-# -------------------------
+
 def train_models(X_train, X_test, y_train, y_test):
     models = {
         "Logistic Regression": LogisticRegression(max_iter=1000),
@@ -65,7 +54,7 @@ def train_models(X_train, X_test, y_train, y_test):
         "Random Forest": RandomForestClassifier(random_state=42),
     }
     if XGBOOST_AVAILABLE:
-        # configure XGBoost only when available
+     
         models["XGBoost"] = XGBClassifier(use_label_encoder=False, eval_metric='logloss')
     
     results = {}
@@ -79,9 +68,6 @@ def train_models(X_train, X_test, y_train, y_test):
     
     return results
 
-# -------------------------
-# TRAIN MODELS
-# -------------------------
 if st.button("Train Models"):
     results = train_models(X_train, X_test, y_train, y_test)
     result_df = pd.DataFrame({name: [r["accuracy"], r["f1"]] for name, r in results.items()},
@@ -98,21 +84,14 @@ if st.button("Train Models"):
 
     st.info("Model and Scaler saved successfully!")
 
-# -------------------------
-# MODEL EVALUATION VISUALIZATION
-# -------------------------
 if st.checkbox("Show Correlation Heatmap"):
     st.subheader("Feature Correlation Heatmap")
     fig, ax = plt.subplots()
     sns.heatmap(df.corr(), annot=True, cmap='coolwarm', ax=ax)
     st.pyplot(fig)
 
-# -------------------------
-# PREDICTION SECTION
-# -------------------------
 st.header("🧍 Predict Heart Disease")
 
-# Load saved model if available
 try:
     model = joblib.load("best_model.pkl")
     scaler = joblib.load("scaler.pkl")
@@ -120,7 +99,6 @@ except:
     st.warning("⚠️ Please train the model first.")
     st.stop()
 
-# Collect input data
 col1, col2 = st.columns(2)
 with col1:
     age = st.number_input("Age", 20, 100, 45)
@@ -138,7 +116,6 @@ with col2:
     ca = st.number_input("Major Vessels (0-4)", 0, 4, 0)
     thal = st.number_input("Thal (0=Normal, 1=Fixed Defect, 2=Reversible Defect)", 0, 2, 1)
 
-# Make prediction
 if st.button("Predict"):
     input_data = np.array([[age, sex, cp, trestbps, chol, fbs,
                             restecg, thalach, exang, oldpeak, slope, ca, thal]])
@@ -150,3 +127,4 @@ if st.button("Predict"):
         st.error(f"⚠️ The model predicts a **High Risk** of Heart Disease (Probability: {probability:.2f})")
     else:
         st.success(f"💚 The model predicts **Low Risk** of Heart Disease (Probability: {probability:.2f})")
+
